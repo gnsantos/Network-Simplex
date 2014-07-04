@@ -61,14 +61,16 @@ typedef struct grafo* Graph;
 
 Graph init_graph(int,Vertex,Vertex,double);
 Arc new_arc(Vertex,Vertex,double,double);
-int is_arc(Graph, Vertex, Vertex);
+Arc is_arc(Graph, Vertex, Vertex);
 Arc add_arc(Graph, Vertex, Vertex, double, double);
 void set_parent(Graph, Vertex, Vertex, Arc);
 Vertex prnt(Graph, Vertex);
 int depth(Graph, Vertex);
-Arc tree_path(Graph,Vertex, Vertex, Vertex**,int*);
+Arc entry_arc(Graph);
+Arc tree_path(Graph, Arc, Vertex**,int*);
+void update_y(Graph);
 void show_graph(Graph);
 void show_tree(Graph);
-void show_path(Graph, Vertex, Vertex);
+void show_path(Graph, Arc);
 
 #endif

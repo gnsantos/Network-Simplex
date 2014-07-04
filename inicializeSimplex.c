@@ -84,9 +84,27 @@ int main(int argc, char** argv){
   show_graph(g);
   show_tree(g);
   while(scanf("%d %d", &u, &v) != EOF){
-    show_path(g,u,v);
-    show_tree(g);
+    x = is_arc(g,u,v);
+    if(x == NULL){
+      puts("denied!");
+      continue;
+    }
+    show_path(g,x);
+    show_graph(g);
   }
   return 0;
 }
 
+/*
+void simplex(Graph g){ ----> g ja deve conter uma arvore com solucao inicial e potenciais certos
+  Arc x, leaving;
+  Vertex *path;
+  int s;
+  while( (x = entry_arc(g)) != null){
+    leaving = tree_path(g,e, &path, &s);
+    update_parents(g); --------------------> tem que colocar o que entra e tirar o que sai
+    update_profundidades(g);
+    update_y(g);
+  }
+}
+*/

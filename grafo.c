@@ -40,14 +40,16 @@ Arc new_arc(Vertex ini, Vertex dest, double cost, double fluxo){ /*inicializa um
   return new;
 }
 
-int is_arc(Graph g, Vertex u, Vertex v){/*CHECA SE UM ARCO u->v JA EXISTE*/
+Arc is_arc(Graph g, Vertex u, Vertex v){/*CHECA SE UM ARCO u->v JA EXISTE*/
   list l;
+  double inf = 1.0/0.0;
   for(l = g->adj[u]; l != NULL; l = l->next){/*percorre a lista de adjacencia de u*/
     Arc x = l->arco; /*pega o arco associado aquela posicao na lista*/
-    if(x->ini == u && x->dest == v) /*se e um arco de u para v, o arco ja existe e retorna-se 1*/
-      return 1;
+    if(x->ini == u && x->dest == v && x->cost != inf) /*se e um arco nao artificial de u para v
+						       existe, ele eh retornado.*/
+      return x;
   }
-  return 0; /*o arco nao existe*/
+  return null; /*o arco nao existe*/
 }
 
 /*insere um novo arco no grafo*/
@@ -93,23 +95,25 @@ Arc entry_arc(Graph g){
   Vertex v;
   Arc x = null;
   list l;
+  double inf = 1.0/0.0;
   for(v = 0; v < g->n; v++){
     for(l = g->adj[v]; l != null; l = l->next){
-      x = l->arc;
-      if((g->y[x->ini] + x->cost <  g->y[x->dest]) && !x->inTree) /*candidato a entrar na base*/
+      x = l->arco;
+      if((g->y[x->ini] + x->cost <  g->y[x->dest]) && !x->inTree && x->cost != inf) /*candidato a entrar na base*/
 	return x; /*devolve o candidato a entrar na base*/
     }
   }
   return x; /*se nao encontrar nenhum candidato valido, retorn null e sabemo que acabamos.*/
 }
 
-/*procura o caminho entre u e v na arvore representada.
+/*procura o caminho entre u e v na arvore representada, onde u e v sao as extremidades do arco
+  de entrada.
   Na verdade, essa funcao serve para determinar o arco que deve sair. Os vertices u e v sao as
   extremidades do arco que entra. Enquanto achamos o caminho, vamos mantendo regsitro do arco
   reverso com menor fluxo; ele sera o retornado pela funcao e removido da arvore.*/
-Arc tree_path(Graph g, Vertex u, Vertex v, Vertex** pshow, int* s){
+Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
   Arc x, resp, xv, xu;
-  Vertex aux;
+  Vertex aux, u = entry->ini, v = entry->dest;
   /*para teste de codigo, foram mantidas variaveis para armazenar explicitamente o caminho*/
   Vertex *path; /*caminho de u a v*/
   Vertex *upath = malloc(sizeof(Vertex)*g->n);/*camino de u ate ancestral*/
@@ -226,6 +230,7 @@ Arc tree_path(Graph g, Vertex u, Vertex v, Vertex** pshow, int* s){
     diretos->arco->fluxo += minflow;
     diretos = diretos->next;
   }
+  entry->fluxo = minflow;
 
   /*!!!!!!!!!!!!!!!OLHA AQUI!!!!!!!!!!!!!!!!!!
    resp->inTree = 0;*/
@@ -254,6 +259,12 @@ void update_y(Graph g){
     if(prnt(g,root) == root)
       break;
 }
+
+/*
+  void update_sucessor(Graph g){ }
+  void update_pais(Graph g){ }
+  void update_profundidade(Graph g){ }
+*/
 
 /*imprime os vertices adjacentes a todos os vertices, o custo da aresta entre ele e seu fluxo*/
 void show_graph(Graph g){
@@ -289,12 +300,12 @@ void show_tree(Graph g){
 }
 
 /*imprime o caminho entre vertices u e v e qual aresta sai da base se colocamos o arco u->v*/
-void show_path(Graph g, Vertex u, Vertex v){
+void show_path(Graph g, Arc e){
   Vertex *path = null;
   Arc x;
   int size = 0;
   int i;
-  x = tree_path(g,u,v, &path, &size);
+  x = tree_path(g,e,&path, &size);
   for(i = 0; i < size; i++)
     printf(" %d ",path[i]);
   puts("");
