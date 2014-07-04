@@ -89,7 +89,9 @@ int main(int argc, char** argv){
       puts("denied!");
       continue;
     }
-    show_path(g,x);
+    update_prnt(g,x);
+    update_depth(g);
+    show_tree(g);
     show_graph(g);
   }
   return 0;
@@ -106,5 +108,7 @@ void simplex(Graph g){ ----> g ja deve conter uma arvore com solucao inicial e p
     update_profundidades(g);
     update_y(g);
   }
+  show_graph(g);
+  show_tree(g);
 }
 */

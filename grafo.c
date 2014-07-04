@@ -45,11 +45,22 @@ Arc is_arc(Graph g, Vertex u, Vertex v){/*CHECA SE UM ARCO u->v JA EXISTE*/
   double inf = 1.0/0.0;
   for(l = g->adj[u]; l != NULL; l = l->next){/*percorre a lista de adjacencia de u*/
     Arc x = l->arco; /*pega o arco associado aquela posicao na lista*/
-    if(x->ini == u && x->dest == v && x->cost != inf) /*se e um arco nao artificial de u para v
-						       existe, ele eh retornado.*/
+    if(x->ini == u && x->dest == v && x->cost != inf ) /*se e um arco nao artificial de u para v
+							existe, ele eh retornado.*/
       return x;
   }
   return null; /*o arco nao existe*/
+}
+
+Arc is_tree_arc(Graph g, Vertex u, Vertex v){
+  int i;
+  Arc x;
+  for(i = 0; i < g->n; i++){
+    x = g->arvore[i];
+    if(x != null && x->ini == u && x->dest == v)
+      return x;
+  }
+  return null;
 }
 
 /*insere um novo arco no grafo*/
@@ -78,6 +89,7 @@ void set_parent(Graph g, Vertex u, Vertex v, Arc x){
   g->pais[v] = u;
   g->profundidade[v] = 1 + g->profundidade[u];
   g->arvore[v] = x;
+  x->inTree = 1;
 }
 
 /*um simples getter para o pai*/
@@ -177,14 +189,14 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
   }
   
   /*uma vez que ambos estam na mesma profundidade, seguimos simultaneamente ambos os caminhos
-   ate encontramos um acestral comum.*/
+    ate encontramos um acestral comum.*/
   while(upath[i] != vpath[j]){
     upath[i+1] = prnt(g,upath[i]);
     vpath[j+1] = prnt(g, vpath[j]);
 
     /*repetimos o processo de verificar se os arcos que encontramos sao diretos ou reversos
-     e de colocarmos nas respectivas listas. Se encontramos um arco reverso de fluxo menor
-    do que se tinha visto antes, atualiza-se a resposta.*/
+      e de colocarmos nas respectivas listas. Se encontramos um arco reverso de fluxo menor
+      do que se tinha visto antes, atualiza-se a resposta.*/
     xv = g->arvore[vpath[j]];
     xu = g->arvore[upath[i]];
     list newv = malloc(sizeof(list));
@@ -232,8 +244,8 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
   }
   entry->fluxo = minflow;
 
-  /*!!!!!!!!!!!!!!!OLHA AQUI!!!!!!!!!!!!!!!!!!
-   resp->inTree = 0;*/
+  /*!!!!!!!!!!!!!!!OLHA AQUI!!!!!!!!!!!!!!!!!!*/
+  resp->inTree = 0;
   
   /*para fins de debug, mantemos um vetor com o caminho explicito*/
   path = malloc(sizeof(Vertex)*(i + j + 1));
@@ -253,11 +265,101 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
 
 }
 
-void update_y(Graph g){
-  Vertex root;
+Vertex* reverse_path(Vertex *path, int size){
+  int i = 0;
+  Vertex* r = malloc(sizeof(Vertex)*size);
+  for(i = 0; i < size; i++)
+    r[i] = path[size-1-i];
+  free(path);
+  return r;
+}
+
+void update_prnt(Graph g, Arc entry){
+  Arc leaving, auxiliar;
+  Vertex *path, e1, e2, f1, f2, root;
+  int size = 0, i, beforeroot = 1, posroot = pow(2,30), posf2;
+  leaving = tree_path(g,entry,&path,&size);
   for(root = 0; root < g->n; root++)
     if(prnt(g,root) == root)
       break;
+  if(depth(g,leaving->ini) < depth(g,leaving->dest)){
+    f1 = leaving->ini;
+    f2 = leaving->dest;
+  }
+  else{
+    f1 = leaving->dest;
+    f2 = leaving->ini;
+  }
+  if(depth(g,entry->ini) < depth(g,entry->dest)){
+    e1 = entry->ini;
+    e2 = entry->dest;
+  }
+  else{
+    e1 = entry->dest;
+    e2 = entry->ini;
+  }
+
+  if(path[0] == e1)
+    path = reverse_path(path, size);
+  
+  for(i = 0; i < size; i++){
+    if(path[i] == root) posroot = i;
+    if(path[i] == f2) posf2 = i;
+  }
+
+  if(posf2 > posroot) beforeroot = 0;
+
+  if(!beforeroot){
+    set_parent(g, e2, e1, entry);
+    for(i = posf2; path[i] != e1; i++){
+      auxiliar = is_tree_arc(g,path[i], path[i+1]);
+      if(auxiliar == null) 
+	auxiliar = is_tree_arc(g,path[i+1],path[i]);
+      set_parent(g, path[i+1],path[i], auxiliar);
+    } 
+  }
+  else{
+    set_parent(g, e1, e2, entry);    
+    for(i = 0; path[i] != f2; i++){
+      auxiliar = is_tree_arc(g, path[i], path[i+1]);
+      if(auxiliar == null) 
+	auxiliar = is_tree_arc(g,path[i+1],path[i]);
+      set_parent(g,path[i], path[i+1], auxiliar);
+    }
+  }
+
+}
+
+void update_depth(Graph g){
+  Vertex v;
+  int i = 0;
+  int updated = 1;
+  while(i < g->n && updated == 1){
+    updated = 0;
+    for(v = 0; v < g->n; v++){
+      if((depth(g,v) != depth(g,g->pais[v]) + 1) && v != prnt(g,v)){
+	g->profundidade[v] = g->profundidade[prnt(g,v)] + 1;
+	updated = 1;
+      }
+      if(v == prnt(g,v))
+	g->profundidade[v] = 1;
+    }
+    i++;
+  }
+}
+
+void update_y(Graph g){
+  Vertex root, v;
+  int i;
+  for(root = 0; root < g->n; root++)
+    if(prnt(g,root) == root)
+      break;
+  
+  g->y[root] = 0;
+
+  for(i = 0; i < g->n; i++){
+    
+  }
 }
 
 /*

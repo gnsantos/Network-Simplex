@@ -47,7 +47,7 @@ e de profundidade:
               i: 0 1 2 3 4 5
 profundidade[i]: 4 1 3 3 3 1
 */
-  Arc *arvore; /*Um vetor de arcos: o arco arvore[i] eh o arco que vai de pais[i] para i*/
+  Arc *arvore; /*Um vetor de arcos: o arco arvore[i] eh o arco liga pais[i] e i*/
   double *y; /*vetor de potenciais.*/
   Vertex origem; /*guarda qual eh o no de origem na rede*/
   Vertex destino; /*guarda qual eh o no de desino na rede*/
@@ -59,18 +59,20 @@ typedef struct grafo* Graph;
 /******************* FUNCOES PARA INICIALIZACAO E MANIPULACAO DE ESTRUTURAS ********************/
 
 
-Graph init_graph(int,Vertex,Vertex,double);
-Arc new_arc(Vertex,Vertex,double,double);
-Arc is_arc(Graph, Vertex, Vertex);
-Arc add_arc(Graph, Vertex, Vertex, double, double);
-void set_parent(Graph, Vertex, Vertex, Arc);
-Vertex prnt(Graph, Vertex);
-int depth(Graph, Vertex);
-Arc entry_arc(Graph);
-Arc tree_path(Graph, Arc, Vertex**,int*);
-void update_y(Graph);
-void show_graph(Graph);
-void show_tree(Graph);
-void show_path(Graph, Arc);
+Graph init_graph(int,Vertex,Vertex,double); /*inicializa um grafo, alocando o necessario*/
+Arc new_arc(Vertex,Vertex,double,double); /*cria um novo arco*/
+Arc is_arc(Graph, Vertex, Vertex); /*verifica se um arco (nao artificial) existe*/
+Arc add_arc(Graph, Vertex, Vertex, double, double); /*adiciona um novo arco ao grafo*/
+void set_parent(Graph, Vertex, Vertex, Arc); /*define o pai de um vertice na arvore e qual o arco que o liga*/
+Vertex prnt(Graph, Vertex); /*devolve o pai de um vertice*/
+int depth(Graph, Vertex); /*devolve a profundidade de um vertice*/
+Arc entry_arc(Graph); /*escolhe um arco para entrar na base*/
+Arc tree_path(Graph, Arc, Vertex**,int*); /*encontra o caminho entre vertices e escolhe um arco para sair da base*/
+void update_prnt(Graph, Arc); /*atualiza o vetor de pais e de arcos da arvore*/
+void update_depth(Graph); /*atualiza o vetor de profundidades*/
+void update_y(Graph); /*atualiza o vetor de potenciais*/
+void show_graph(Graph); /*imprime uma descricao literal do grafo*/
+void show_tree(Graph); /*imprime um descricao da arvore e de seus arcos*/
+void show_path(Graph, Arc); /*mostra o caminho entre as extremidades de um arco*/
 
 #endif
