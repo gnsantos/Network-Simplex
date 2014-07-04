@@ -6,10 +6,11 @@
 typedef int Vertex; /*vertices sao representados com inteiros*/
 
 struct arc{ /*representacao de um arco*/
-Vertex ini;       /*vertice de inicio do arco*/
-Vertex dest;      /*vertice de chegada do arco*/ 
+  Vertex ini;       /*vertice de inicio do arco*/
+  Vertex dest;      /*vertice de chegada do arco*/ 
   double cost;      /*custo do arco*/
   double fluxo;     /*fluxo passando pelo arco*/
+  int inTree;       /*valor booleano: 1 se o arco esta na arvore (base), 0 caso contrario*/
 };
 
 typedef struct arc *Arc; /*Arc e um ponteiro para um arco*/
@@ -47,6 +48,7 @@ e de profundidade:
 profundidade[i]: 4 1 3 3 3 1
 */
   Arc *arvore; /*Um vetor de arcos: o arco arvore[i] eh o arco que vai de pais[i] para i*/
+  double *y; /*vetor de potenciais.*/
   Vertex origem; /*guarda qual eh o no de origem na rede*/
   Vertex destino; /*guarda qual eh o no de desino na rede*/
   double demanda; /*armazena a quantidade de produto escoado pela rede*/
@@ -64,7 +66,7 @@ Arc add_arc(Graph, Vertex, Vertex, double, double);
 void set_parent(Graph, Vertex, Vertex, Arc);
 Vertex prnt(Graph, Vertex);
 int depth(Graph, Vertex);
-Vertex *tree_path(Graph,Vertex,Vertex,int* s);
+Arc tree_path(Graph,Vertex, Vertex, Vertex**,int*);
 void show_graph(Graph);
 void show_tree(Graph);
 void show_path(Graph, Vertex, Vertex);

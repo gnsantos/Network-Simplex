@@ -79,11 +79,13 @@ int main(int argc, char** argv){
   char * entrada = argv[1];
   Graph g = le_entrada(entrada);
   Vertex v,u;
+  Arc x;
   v = insere_arcos_artificiais(g);
   show_graph(g);
   show_tree(g);
   while(scanf("%d %d", &u, &v) != EOF){
     show_path(g,u,v);
+    show_tree(g);
   }
   return 0;
 }
