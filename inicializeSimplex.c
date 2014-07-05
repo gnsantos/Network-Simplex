@@ -3,6 +3,7 @@
 #include <math.h>
 #include "grafo.h"
 #include "lerEntrada.h"
+#include "simplex.h"
 
 /*O primeiro passo para achar uma solucao viavel e comecar o simplex eh assegurar que podemos
   construir uma arvore de solucao. Para tal vamos escolher um vertic v que nao eh nem a origem,
@@ -22,6 +23,12 @@ int insere_arcos_artificiais(Graph g){
 			       conseguimos nos livrar delas, o problema eh inviavel*/
 
   /*achamos um vertice que nao eh nem a origem, nem o destino*/
+  if(g->n == 2){
+    x = add_arc(g, g->origem, g->destino, infinito, g->demanda);
+    set_parent(g,g->origem,g->destino,x);
+    return g->origem;
+  }
+  
   for(v = 0; v < g->n; v++){
     if(v != g->origem && v != g->destino){
       /*adicionamos arcos de custo infinito indo da origem para o vertice e dele para os demais*/
@@ -75,40 +82,68 @@ void remove_arcos_artificiais(Graph g){
   }
 }
 
-int main(int argc, char** argv){
-  char * entrada = argv[1];
-  Graph g = le_entrada(entrada);
-  Vertex v,u;
-  Arc x;
-  v = insere_arcos_artificiais(g);
-  show_graph(g);
-  show_tree(g);
-  while(scanf("%d %d", &u, &v) != EOF){
-    x = is_arc(g,u,v);
-    if(x == NULL){
-      puts("denied!");
-      continue;
-    }
-    update_prnt(g,x);
-    update_depth(g);
-    show_tree(g);
-    show_graph(g);
-  }
-  return 0;
+void acha_solucao_inicial(Graph g){
+  insere_arcos_artificiais(g);
+  update_y(g);
+  network_simplex(g);
+  remove_arcos_artificiais(g);
 }
 
-/*
-void simplex(Graph g){ ----> g ja deve conter uma arvore com solucao inicial e potenciais certos
-  Arc x, leaving;
-  Vertex *path;
-  int s;
-  while( (x = entry_arc(g)) != null){
-    leaving = tree_path(g,e, &path, &s);
-    update_parents(g); --------------------> tem que colocar o que entra e tirar o que sai
-    update_profundidades(g);
-    update_y(g);
+int checa_viabilidade(Graph g){
+  Arc x;
+  Vertex v;
+  double inf = 1.0/0.0;
+  for(v = 0; v < g->n; v++){
+    x = g->arvore[v];
+    if(x == NULL) continue;
+    if(x->cost == inf)
+      return 0;
   }
+  return 1;
+}
+
+/*int main(int argc, char** argv){
+  char * entrada = argv[1];
+  Graph g = le_entrada(entrada);
+  int viavel;
+  acha_solucao_inicial(g);
+  viavel = checa_viabilidade(g);
+  if(viavel){
+    show_graph(g);
+    show_tree(g);
+  }
+  else
+    printf("Problema inviavel.\n");
+  return 0;
+  }*/
+
+
+/*int main(int argc, char** argv){
+  char * entrada = argv[1];
+  Graph g = le_entrada(entrada);
+  int viavel;
+  Arc x;
+  Vertex u,v;
+  insere_arcos_artificiais(g);
+  update_y(g);
   show_graph(g);
   show_tree(g);
-}
-*/
+  while(scanf("%d %d",&u,&v) != EOF){
+    x = entry_arc(g);
+    if(x == NULL){
+      puts("acabou!");
+      break;
+    }
+    else{
+      printf("Arco de entrada: %d %d", x->ini, x->dest);
+      x = is_arc(g, u, v);
+      update_prnt(g,x);
+      update_y(g);
+      update_depth(g);
+      /*show_graph(g);
+      show_tree(g);
+    }
+  }
+  return 0;
+}*/
+

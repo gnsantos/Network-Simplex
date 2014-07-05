@@ -62,15 +62,12 @@ typedef struct grafo* Graph;
 Graph init_graph(int,Vertex,Vertex,double); /*inicializa um grafo, alocando o necessario*/
 Arc new_arc(Vertex,Vertex,double,double); /*cria um novo arco*/
 Arc is_arc(Graph, Vertex, Vertex); /*verifica se um arco (nao artificial) existe*/
+Arc is_tree_arc(Graph, Vertex, Vertex);
 Arc add_arc(Graph, Vertex, Vertex, double, double); /*adiciona um novo arco ao grafo*/
 void set_parent(Graph, Vertex, Vertex, Arc); /*define o pai de um vertice na arvore e qual o arco que o liga*/
 Vertex prnt(Graph, Vertex); /*devolve o pai de um vertice*/
 int depth(Graph, Vertex); /*devolve a profundidade de um vertice*/
-Arc entry_arc(Graph); /*escolhe um arco para entrar na base*/
-Arc tree_path(Graph, Arc, Vertex**,int*); /*encontra o caminho entre vertices e escolhe um arco para sair da base*/
-void update_prnt(Graph, Arc); /*atualiza o vetor de pais e de arcos da arvore*/
-void update_depth(Graph); /*atualiza o vetor de profundidades*/
-void update_y(Graph); /*atualiza o vetor de potenciais*/
+Vertex *reverse_path(Vertex*, int);
 void show_graph(Graph); /*imprime uma descricao literal do grafo*/
 void show_tree(Graph); /*imprime um descricao da arvore e de seus arcos*/
 void show_path(Graph, Arc); /*mostra o caminho entre as extremidades de um arco*/
