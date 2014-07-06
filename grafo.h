@@ -50,6 +50,6 @@ Graph init_graph(int,Vertex,Vertex,double); /*inicializa um grafo, alocando o ne
 Arc new_arc(Vertex,Vertex,double,double); /*cria um novo arco*/
 Arc is_arc(Graph, Vertex, Vertex); /*verifica se um arco (nao artificial) existe*/
 Arc add_arc(Graph, Vertex, Vertex, double, double); /*adiciona um novo arco ao grafo*/
-void show_graph(Graph); /*imprime uma descricao literal do grafo*/
+void show_graph(Graph,FILE*); /*imprime uma descricao literal do grafo*/
 
 #endif

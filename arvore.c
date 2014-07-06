@@ -78,35 +78,35 @@ Vertex* reverse_path(Vertex *path, int size){
 }
 
 /*imprime a representacao da arvore sendo utilizada*/
-void show_tree(Arvore g){
+void show_tree(Arvore g, FILE *output){
   Vertex v;
   Arc x;
-  puts("Pais:");
+  fputs("Pais:\n",output);
   for(v = 0; v < g->n; v++){
     if(prnt(g,v) != v)
-      printf("\t%d -> %d\t(%d)\n", prnt(g,v), v, depth(g,v));
+      fprintf(output, "\t%d -> %d\t(Profundidade: %d)\n", prnt(g,v), v, depth(g,v));
     else 
-      printf("\t%d\t(raiz)\n", v);
+      fprintf(output,"\t%d\t(raiz)\n", v);
   }
-  puts("Arcos:");
+  fputs("Arcos:\n",output);
   for(v = 0; v < g->n; v++){
     if((x = g->arvore[v]) != null){
-      printf("\t%d->%d - cost: %f - fluxo: %f\n",x->ini, x->dest, x->cost, x->fluxo);
+      fprintf(output,"\t%d->%d - cost: %f - fluxo: %f\n",x->ini, x->dest, x->cost, x->fluxo);
     }
   }
-  puts("");
+  fputs("\n",output);
 }
 
 /*imprime o caminho entre vertices u e v e qual aresta sai da base se colocamos o arco u->v*/
-void show_path(Arvore g, Arc e){
+void show_path(Arvore g, Arc e, FILE *output){
   Vertex *path = null;
   Arc x;
   int size = 0;
   int i;
   x = tree_path(g,e,&path, &size);
   for(i = 0; i < size; i++)
-    printf(" %d ",path[i]);
-  puts("");
-  printf("sai %d->%d, de custo %f e antigo fluxo %f\n\n", x->ini, x->dest, x->cost, x->fluxo);
+    fprintf(output," %d ",path[i]);
+  fputs("\n",output);
+  fprintf(output,"sai %d->%d, de custo %f e antigo fluxo %f\n\n", x->ini, x->dest, x->cost, x->fluxo);
 }
 

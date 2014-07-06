@@ -77,18 +77,18 @@ Arc add_arc(Graph g, Vertex ini, Vertex dest, double cost, double fluxo){
 }
 
 /*imprime os vertices adjacentes a todos os vertices, o custo da aresta entre ele e seu fluxo*/
-void show_graph(Graph g){
+void show_graph(Graph g, FILE* output){
   Vertex v;
   list l;
-  printf("Origem: %d\nDestino: %d\nEscoamento: %f\n", g->origem, g->destino, g->demanda);
+  fprintf(output,"Origem: %d\nDestino: %d\nEscoamento: %f\n", g->origem, g->destino, g->demanda);
   for(v = 0; v < g->n; v++){
-    printf("%d:\n", v);
+    fprintf(output,"%d:\n", v);
     for(l = g->adj[v]; l != NULL; l = l->next){
       Arc x = l->arco;
       if(v == x->ini)
-	printf("\t %d - cost: %f - fluxo: %f\n", x->dest, x->cost, x->fluxo);
+	fprintf(output,"\t %d - cost: %f - fluxo: %f\n", x->dest, x->cost, x->fluxo);
     }
-    puts("");
+    fputs("\n",output);
   }
 }
 

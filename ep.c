@@ -18,14 +18,16 @@ arquivo: ep.c
 
 int main(int argc, char** argv){
   char *entrada = argv[1];
+  char *saida = argv[2];
+  FILE *output;
   Graph g;
   Arvore t;
   int viavel;
   double custo;
   /*verificamos se foi passado um arquivo de entrada com a configuracao da rede.*/
-  if(argc < 2){
-    puts("Entre um arquivo com a configuracao da rede.");
-    puts("USO: ./ep <arquivo_de_entrada>");
+  if(argc < 3){
+    puts("Entre um arquivo com a configuracao da rede e um arquivo para a escrita da saida. Arquivo de saida nao criado.");
+    puts("USO: ./ep <arquivo_de_entrada> <arquivo_de_saida>");
     exit(-1);
   }
   g = le_entrada(entrada); /*constroi o grafo de acordo com as especificacoes da entrada*/
@@ -40,11 +42,13 @@ int main(int argc, char** argv){
   else{
     network_simplex(g,t);
     custo = net_cost(t,g);
-    puts("O estado final do grafo eh: ");
-    show_graph(g);
-    puts("A arvore associada a solucao otima eh:");
-    show_tree(t);
-    printf("O custo minimo do transporte eh: %f\n", custo);
+    output = fopen(saida, "w"); /*abre o arquivo da saida pra escrita*/
+    fputs("O estado final do grafo eh: \n",output);
+    show_graph(g,output);
+    fputs("A arvore associada a solucao otima eh:\n",output);
+    show_tree(t,output);
+    fprintf(output,"O custo minimo do transporte eh: %f\n", custo);
+    printf("A saida do programa foi escrita com sucesso em %s.\n", saida);
   }
   return 0;
 }

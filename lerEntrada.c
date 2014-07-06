@@ -23,6 +23,7 @@ Graph le_entrada(char* nome_entrada){
     puts("O arquivo passado como argumento nao exite!");
     exit(-2);
   }
+  
   fscanf(input, "%d", &n);/*le o numero de vertices*/
   fscanf(input, "%d", &origem); /*le o vertice de origem*/
   fscanf(input, "%d", &destino); /*le o vertice de destino*/
@@ -36,6 +37,9 @@ Graph le_entrada(char* nome_entrada){
     add_arc(g,u,v,cost,0); /*adiciona arco lido na rede*/
   }
   fclose(input);
+
+  printf("A configuracao presente em %s foi lida com sucesso.\n", nome_entrada);
+
   return g; /*retona o grafo descrito pela entrada*/
 }
 

@@ -50,7 +50,7 @@ void set_parent(Arvore, Vertex, Vertex, Arc); /*define o pai de um vertice na ar
 Vertex prnt(Arvore, Vertex); /*devolve o pai de um vertice*/
 int depth(Arvore, Vertex); /*devolve a profundidade de um vertice*/
 Vertex *reverse_path(Vertex*, int); /*inverte um caminho*/
-void show_tree(Arvore); /*imprime um descricao da arvore e de seus arcos*/
-void show_path(Arvore, Arc); /*mostra o caminho entre as extremidades de um arco. Usado para debug.*/
+void show_tree(Arvore,FILE*); /*imprime um descricao da arvore e de seus arcos*/
+void show_path(Arvore, Arc,FILE*); /*mostra o caminho entre as extremidades de um arco. Usado para debug.*/
 
 #endif

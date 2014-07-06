@@ -1,11 +1,33 @@
 O EP INCLUI 6 MODULOS e 11 ARQUIVOS-FONTE:
--arvore.h e arvore.c
--grafo.h e grafo.c
--lerEntrada.h e lerEntrada.c
--inicializeSimplex.h e inicializeSimplex.c
--simplex.h e simplex.c
--ep.c
+
+-arvore.h e arvore.c - definem a estrutura e funcoes que manipulam a arvore da solucao
+-grafo.h e grafo.c   - definem a estrutura e funcoes que manipulam o grafo
+-lerEntrada.h e lerEntrada.c - definem a funcao que faz leitura do arquivo de entrada
+-inicializeSimplex.h e inicializeSimplex.c - definem as funcoes que geram uma solucao viavel inicial para comecarmos o simplex
+-simplex.h e simplex.c - definem as funcoes necessarias para o simplex de rede (achar arco de entrada, de saida, atualizar a arvore e calcular potenciais)
+-ep.c - junta tudo, executa o simplex, acha uma solucao otima e escreve sua descricao no arquivo de saida. No caso de problema inviavel, avisa isso no terminal.
 
 O MAKEFILE FOI INCLUSO. BASTA DIGITAR make NO TERMINAL PARA COMPILAR.
 
-PARA RODAR O PROGRAMA, DIGITAR ./ep <NomeDoArquivoDeEntrada>.
+PARA RODAR O PROGRAMA, DIGITAR ./ep <NomeDoArquivoDeEntrada> <NomeDoArquivoDeSaida>.
+
+SE O PROBLEMA DESCRITO NA ENTRADA FOR INVIAVEL, NAO SERA CRIADO NENHUM ARQUIVO DE SAIDA. SERA DITO NA SAIDA PADRA (O TERMINAL) QUE O PROBLEMA E INVIAVEL E NAO POSSUI SOLUCAO.
+
+CASO O PROBLEMA SEJA VIAVEL, A FORMA DO ARQUIVO DE SAIDA E A SEGUINTE:
+
+O ARQUIVO DE SAIDA TERA UMA DESCRICAO DO GRAFO DA SEGUINTE FORMA:
+
+VERTICE:
+	VERTICE-QUE-EH-PONTA-DE-CHEGADA-UMA-ARESTA-SAINDO-DE-V - CUSTO - FLUXO
+
+(OU SEJA, PARA CADA VERTICE, IMPRIMIMOS VERTICES QUE SAO PONTAS DE CHEGADA DE UMA ARCO SAINDO DO VERTICE, O CUSTO DO ARCO QUE CONECTA ESSES DOIS VERTICES E O FLUXO QUE PASSA POR ESSE ARCO)
+
+TAMBEM DAMOS UMA DESCRICAO DA ARVORE OTIMA DO PROBLEMA DA SEGUINTE FORMA:
+
+       IMPRIMIMOS O VETOR DE PAIS, DA SEGUINTE FORMA:
+       		  PAI[VERTICE] -> VERTICE (PROFUNDIADE DO VERTICE)
+	
+	IMPRIMIMOS OS ARCOS QUE COMPOE A ARVORE:
+		   SAIDA -> CHEGADA - CUSTO - FLUXO
+
+POR FIM, IMPRIMIMOS O CUSTO MINIMO DE TRANSPORTE.
