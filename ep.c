@@ -35,7 +35,7 @@ int main(int argc, char** argv){
   viavel = checa_viabilidade(t); /*checa se a solucao encontrada no problema auxiliar eh uma
 				  solucao viavel do problema que queremos resolver*/
   if( !viavel ){
-    puts("O problema entrado e inviavel e nao possui solucao.");
+    puts("O problema entrado e inviavel e nao possui solucao. Nao foi criado o arquivo de saida.");
   }
   /*Se a solucao foi viavel, executamos o simplex de rede partindo dela, calculamos o custo do transporte
    e imprimimos o grafo, o vetor de pais, e os arcos da arvore otima.*/
