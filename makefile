@@ -1,6 +1,6 @@
 ep: inicializeSimplex.o lerEntrada.o grafo.o simplex.o ep.o arvore.o
 	gcc-4.6 inicializeSimplex.o lerEntrada.o grafo.o simplex.o arvore.o ep.o -g -o ep -lm
-ep.o: grafo.c lerEntrada.c simplex.c inicializeSimplex.c
+ep.o: grafo.c lerEntrada.c simplex.c inicializeSimplex.c ep.c
 	gcc-4.6 -Wall -ansi -pedantic -c -O2 ep.c -lm
 inicializeSimplex.o: inicializeSimplex.c lerEntrada.c grafo.c simplex.c
 	gcc-4.6 -Wall -ansi -pedantic -c -O2 inicializeSimplex.c -lm

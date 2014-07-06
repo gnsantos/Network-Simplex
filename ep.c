@@ -49,7 +49,10 @@ int main(int argc, char** argv){
     show_tree(t,output);
     fprintf(output,"O custo minimo do transporte eh: %f\n", custo);
     printf("A saida do programa foi escrita com sucesso em %s.\n", saida);
+    fclose(output); /*fecha o arquivo de saida*/
   }
+  free(g); /*desaloca memoria do grafo*/
+  free(t); /*desaloca memoria da arvore*/
   return 0;
 }
 
