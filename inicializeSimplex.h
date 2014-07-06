@@ -1,3 +1,14 @@
+/****************************************************************
+EXERCICIO-PROGRAMA DE MAC0315 - PROGRAMACAO LINEAR
+PRIMEIRO SEMESTRE DE 2014
+ALUNO: GERVASIO PROTASIO DOS SANTOS NETO
+NUSP: 7990996
+PROFESSOR: WALTER MASCARENHAS
+
+arquivo: inicializeSimplex.h
+ ****************************************************************/
+
+
 #ifndef H_INICIALIZESIMPLEX_DEFINE
 #define H_INICIALIZESIMPLEX_DEFINE
 

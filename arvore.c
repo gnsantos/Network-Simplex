@@ -1,3 +1,13 @@
+/****************************************************************
+EXERCICIO-PROGRAMA DE MAC0315 - PROGRAMACAO LINEAR
+PRIMEIRO SEMESTRE DE 2014
+ALUNO: GERVASIO PROTASIO DOS SANTOS NETO
+NUSP: 7990996
+PROFESSOR: WALTER MASCARENHAS
+
+arquivo: arvore.c
+ ****************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

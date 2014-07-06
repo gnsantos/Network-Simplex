@@ -1,0 +1,11 @@
+O EP INCLUI 6 MODULOS e 11 ARQUIVOS-FONTE:
+-arvore.h e arvore.c
+-grafo.h e grafo.c
+-lerEntrada.h e lerEntrada.c
+-inicializeSimplex.h e inicializeSimplex.c
+-simplex.h e simplex.c
+-ep.c
+
+O MAKEFILE FOI INCLUSO. BASTA DIGITAR make NO TERMINAL PARA COMPILAR.
+
+PARA RODAR O PROGRAMA, DIGITAR ./ep <NomeDoArquivoDeEntrada>.
