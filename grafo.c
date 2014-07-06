@@ -5,7 +5,8 @@
 
 #define null NULL
 
-Graph init_graph(int n, Vertex origem, Vertex destino, double demanda){/*INICIALIZA UM GRAFO*/
+/*INICIALIZA UM GRAFO*/
+Graph init_graph(int n, Vertex origem, Vertex destino, double demanda){
   Graph g = malloc(sizeof(*g)); /*aloca memoria para o grafo*/
   Vertex v;
   g->n = n; /*inicializa o numero de vertices*/
@@ -13,25 +14,15 @@ Graph init_graph(int n, Vertex origem, Vertex destino, double demanda){/*INICIAL
   g->adj = malloc(sizeof(list)*n); /*alocamos espaco para o vetor d listas*/
   for(v = 0; v < n; v++) /*como ainda nao ha nenhum arco, setamos todas as listas para null*/
     g->adj[v] = NULL; 
-  g->origem = origem;
-  g->destino = destino;
-  g->demanda = demanda;
-  g->pais = malloc(sizeof(Vertex)*g->n);
-  for(v = 0; v < g->n; v++)
-    g->pais[v] = v; /*a arvore ainda nao foi construida: cada vertice eh seu proprio pai*/
-  g->profundidade = malloc(sizeof(int)*g->n);
-  for(v = 0; v < g->n; v++)
-    g->profundidade[v] = 1;
-  g->arvore = malloc(sizeof(Arc)*(g->n));
-  for(v = 0; v < g->n; v++)
-    g->arvore[v] = NULL;
-  g->y = malloc(sizeof(double)*g->n);
-  for(v = 0; v < g->n; v++)
-    g->y[v] = 0;
+  g->origem = origem; /*seta a origem do fluxo*/
+  g->destino = destino; /*seta o destino final do fluxo*/
+  g->demanda = demanda; /*seta qunto de produto passa pelo grafo*/
+  
   return g;
 }
 
-Arc new_arc(Vertex ini, Vertex dest, double cost, double fluxo){ /*inicializa um novo arco*/
+/*inicializa um novo arco*/
+Arc new_arc(Vertex ini, Vertex dest, double cost, double fluxo){ 
   Arc new = malloc(sizeof(*new));
   new->ini = ini;
   new->dest = dest;
@@ -41,7 +32,8 @@ Arc new_arc(Vertex ini, Vertex dest, double cost, double fluxo){ /*inicializa um
   return new;
 }
 
-Arc is_arc(Graph g, Vertex u, Vertex v){/*CHECA SE UM ARCO u->v JA EXISTE*/
+/*CHECA SE UM ARCO u->v EXISTE*/
+Arc is_arc(Graph g, Vertex u, Vertex v){/*CHECA SE UM ARCO u->v EXISTE*/
   list l;
   double inf = 1.0/0.0;
   for(l = g->adj[u]; l != NULL; l = l->next){/*percorre a lista de adjacencia de u*/
@@ -51,17 +43,6 @@ Arc is_arc(Graph g, Vertex u, Vertex v){/*CHECA SE UM ARCO u->v JA EXISTE*/
       return x;
   }
   return null; /*o arco nao existe*/
-}
-
-Arc is_tree_arc(Graph g, Vertex u, Vertex v){
-  int i;
-  Arc x;
-  for(i = 0; i < g->n; i++){
-    x = g->arvore[i];
-    if(x != null && x->ini == u && x->dest == v)
-      return x;
-  }
-  return null;
 }
 
 /*insere um novo arco no grafo*/
@@ -85,34 +66,6 @@ Arc add_arc(Graph g, Vertex ini, Vertex dest, double cost, double fluxo){
     quanto os arcos que saem dele*/
 }
 
-/*Atribui u como novo pai de v na arvore*/
-void set_parent(Graph g, Vertex u, Vertex v, Arc x){
-  g->pais[v] = u;
-  g->profundidade[v] = 1 + g->profundidade[u];
-  g->arvore[v] = x;
-  x->inTree = 1;
-}
-
-/*um simples getter para o pai*/
-Vertex prnt(Graph g, Vertex v){
-  return g->pais[v];
-}
-
-/*getter para a profundidade de v*/
-int depth(Graph g, Vertex v){
-  return g->profundidade[v];
-}
-
-Vertex* reverse_path(Vertex *path, int size){
-  int i = 0;
-  Vertex* r = malloc(sizeof(Vertex)*size);
-  for(i = 0; i < size; i++)
-    r[i] = path[size-1-i];
-  free(path);
-  return r;
-}
-
-
 /*imprime os vertices adjacentes a todos os vertices, o custo da aresta entre ele e seu fluxo*/
 void show_graph(Graph g){
   Vertex v;
@@ -129,32 +82,3 @@ void show_graph(Graph g){
   }
 }
 
-/*imprime a representacao da arvore sendo utilizada*/
-void show_tree(Graph g){
-  Vertex v;
-  Arc x;
-  puts("Pais:");
-  for(v = 0; v < g->n; v++){
-    printf("\t%d -> %d\t(%d)\n", prnt(g,v), v, depth(g,v));
-  }
-  puts("Arcos:");
-  for(v = 0; v < g->n; v++){
-    if((x = g->arvore[v]) != null){
-      printf("\t%d->%d - cost: %lf - fluxo: %lf\n",x->ini, x->dest, x->cost, x->fluxo);
-    }
-  }
-  puts("");
-}
-
-/*imprime o caminho entre vertices u e v e qual aresta sai da base se colocamos o arco u->v*/
-void show_path(Graph g, Arc e){
-  Vertex *path = null;
-  Arc x;
-  int size = 0;
-  int i;
-  x = tree_path(g,e,&path, &size);
-  for(i = 0; i < size; i++)
-    printf(" %d ",path[i]);
-  puts("");
-  printf("sai %d->%d, de custo %lf e antigo fluxo %lf\n\n", x->ini, x->dest, x->cost, x->fluxo);
-}

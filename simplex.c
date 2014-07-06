@@ -2,34 +2,35 @@
 #include <stdlib.h>
 #include <math.h>
 #include "grafo.h"
+#include "arvore.h"
 
 #define null NULL
 
 /*escolhe um arco para entrar na base*/
-Arc entry_arc(Graph g){
-  Vertex v;
-  Arc e, x = null;
-  list l;
-  double inf = 1.0/0.0;
-  for(v = 0; v < g->n; v++){
-    for(l = g->adj[v]; l != null; l = l->next){
-      e = l->arco;
-      /*candidato a entrar na base*/
-      if((g->y[e->ini] -  g->y[e->dest] > e->cost) && !e->inTree && e->cost != inf){ 
-	x = e;
-	return x; /*devolve o candidato a entrar na base*/
-      }
-    }
-  }
-  return x; /*se nao encontrar nenhum candidato valido, retorn null e sabemo que acabamos.*/
+Arc entry_arc(Graph g, Arvore t){
+Vertex v;
+Arc e, x = null;
+list l;
+double inf = 1.0/0.0;
+ for(v = 0; v < g->n; v++){
+   for(l = g->adj[v]; l != null; l = l->next){
+     e = l->arco;
+     /*Um arco (i,j) eh candidato a entrar na base se y[i] - y[j] > custo de (i,j). Essa formula eh adaptado do Chvatal.*/
+     if((t->y[e->ini] -  t->y[e->dest] > e->cost) && !e->inTree && e->cost != inf){ 
+       x = e;
+       return x; /*devolve o candidato a entrar na base*/
+     }
+   }
+ }
+ return x; /*se nao encontrar nenhum candidato valido, retorn null e sabemo que acabamos.*/
 }
 
 /*procura o caminho entre u e v na arvore representada, onde u e v sao as extremidades do arco
-  de entrada.
+  de entrada entry.
   Na verdade, essa funcao serve para determinar o arco que deve sair. Os vertices u e v sao as
   extremidades do arco que entra. Enquanto achamos o caminho, vamos mantendo regsitro do arco
   reverso com menor fluxo; ele sera o retornado pela funcao e removido da arvore.*/
-Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
+Arc tree_path(Arvore g, Arc entry, Vertex** pshow, int* s){
   Arc x, resp, xv, xu;
   Vertex aux, u = entry->ini, v = entry->dest;
   /*para teste de codigo, foram mantidas variaveis para armazenar explicitamente o caminho*/
@@ -40,6 +41,7 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
   double minflow = 1.0/0.0;
   list reversos = null; /*lista dos arcos reversos, cujo fluxo sera diminuido*/
   list diretos = null; /*lista dos arcos diretos, cujo fluxo sera aumentado*/
+  list new, newv, newu;
 
   for(aux = 0; aux < g->n; aux++)
     upath[aux] = vpath[aux] = -1;
@@ -53,7 +55,7 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
       upath[i+1] = prnt(g,upath[i]);
       /*verificamos se o arco pelo qual u esta na arvore eh direto ou reverso*/
       x = g->arvore[upath[i]];
-      list new = malloc(sizeof(list));
+      new = malloc(sizeof(list));
       new->arco = x;
       if(x->ini == upath[i]){ /*eh um arco reverso*/
 	new->next = reversos; /*se ele for reverso, o colocamos na lista de arcos reversos*/
@@ -76,7 +78,7 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
     while(depth(g,vpath[j]) != depth(g,u)){
       vpath[j+1] = prnt(g,vpath[j]);
       x = g->arvore[vpath[j]];
-      list new = malloc(sizeof(list));
+      new = malloc(sizeof(list));
       new->arco = x;
       if(x->ini != vpath[j]){ /*eh um arco reverso*/
 	new->next = reversos;
@@ -105,8 +107,8 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
       do que se tinha visto antes, atualiza-se a resposta.*/
     xv = g->arvore[vpath[j]];
     xu = g->arvore[upath[i]];
-    list newv = malloc(sizeof(list));
-    list newu = malloc(sizeof(list));
+    newv = malloc(sizeof(list));
+    newu = malloc(sizeof(list));
     newv->arco = xv;
     newu->arco = xu;
     
@@ -139,18 +141,20 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
     j = j + 1;
     i = i + 1;
   }
-
+  
+  /*diminui o fluxo dos arcos reversos*/
   while(reversos != null){
     reversos->arco->fluxo -= minflow;
     reversos = reversos->next;
   }
+  /*aumenta o fluxo dos arcos com a mesma orientacao de entry*/
   while(diretos != null){
     diretos->arco->fluxo += minflow;
     diretos = diretos->next;
   }
-  entry->fluxo = minflow;
+  entry->fluxo = minflow; /*atualiza o fluxo do arco de entrada*/
 
-  /*!!!!!!!!!!!!!!!OLHA AQUI!!!!!!!!!!!!!!!!!!*/
+  /*remove da arvore o arco de saida*/
   resp->inTree = 0;
   
   /*para fins de debug, mantemos um vetor com o caminho explicito*/
@@ -171,15 +175,25 @@ Arc tree_path(Graph g, Arc entry, Vertex** pshow, int* s){
 
 }
 
-
-void update_prnt(Graph g, Arc entry){
+/*
+  Atualiza o vetor de pais e o vetor de arcos da arvore. Recebe como entrada uma arvore antiga
+  e um arco que esta sendo adicionado a ela, entao descobre o caminho entre suas extremidades,
+  qual eh o arco de saida (que eh removido da arvore na funcao tree_path) e atualizamos o vetor
+  de pais conforme o necessario.
+*/
+void update_prnt(Arvore g, Arc entry){
   Arc leaving, auxiliar;
   Vertex *path, e1, e2, f1, f2, root;
   int size = 0, i, beforeroot = 1, posroot = pow(2,30), posf2, posf1;
-  leaving = tree_path(g,entry,&path,&size);
-  for(root = 0; root < g->n; root++)
+
+  leaving = tree_path(g,entry,&path,&size); /*arco de saida*/
+  
+  for(root = 0; root < g->n; root++) /*encontra a raiz*/
     if(prnt(g,root) == root)
       break;
+  
+  /*Setamos f2 para ser a ponta mais profunda do vertice de saida
+   e e2 para ser a ponta mais profund do vertice de chegada.*/
   if(depth(g,leaving->ini) < depth(g,leaving->dest)){
     f1 = leaving->ini;
     f2 = leaving->dest;
@@ -196,18 +210,27 @@ void update_prnt(Graph g, Arc entry){
     e1 = entry->dest;
     e2 = entry->ini;
   }
-
+  
+  /*vamos comecar a seguir o caminho entre os pontos. Por comodidade,
+   assumimos que e2 eh o primeiro vertice desse caminho. Se esse nao
+  for o caso, invertemos o caminho.*/
+  
   if(path[0] == e1)
     path = reverse_path(path, size);
   
+  /*descobrimos a posicao de f1, f2 e da raiz no caminho (se a raiz nao
+   esta no caminho, sua posicao eh "infinito".*/
   for(i = 0; i < size; i++){
     if(path[i] == root) posroot = i;
     if(path[i] == f2) posf2 = i;
     if(path[i] == f1) posf1 = i;
   }
-
+  
+  /*tratamos de formas diferentes quando f2 ocorre depois da raiz/f1.*/
   if(posf2 > posroot || posf2 > posf1) beforeroot = 0;
-
+  
+  /*se f2 ocorre antes, fazemos de e2 pai de e1, e vamos voltando no caminho 
+   a partir de f2 fazendo de cada vertice, filho do anterior no caminho*/
   if(!beforeroot){
     set_parent(g, e2, e1, entry);
     for(i = posf2; path[i] != e1; i++){
@@ -217,6 +240,8 @@ void update_prnt(Graph g, Arc entry){
       set_parent(g, path[i+1],path[i], auxiliar);
     } 
   }
+  /*caso contrario, fazemo de e1 pai de e2 e percorremos desde o comeco o 
+    caminho de e2 para e1 fazendo de cada vertice pai do proximo.*/
   else{
     set_parent(g, e1, e2, entry);    
     for(i = 0; path[i] != f2; i++){
@@ -229,10 +254,26 @@ void update_prnt(Graph g, Arc entry){
 
 }
 
-void update_depth(Graph g){
+/*
+  Atualizamos o vetor de profundidades baseando-nos no fato
+  de que quando o vetor esta correto temos que:
+  
+  profundidade[i] = 1 + profundidae[pai[i]]
+*/
+
+void update_depth(Arvore g){
   Vertex v;
   int i = 0;
-  int updated = 1;
+  int updated = 1; /*guarda se alguma profundidade foi alterada*/
+
+  /*Fazemos (no maximo) n passagens pelo vetor em busca de vertices
+   cujas profundidades precisam ser ajustadas. Se mudarmos alguma
+  profundiade setamos updated para 1. Se updated for 0, eh porque
+  todas as profundidades estam corretas e podemos parar.
+
+  Sabemos que ao final teremos todas as profundiades certas pois,
+  no pior caso, a cada iteracao do loop while, atualizamos uma
+  profundidade para seu valor correto.*/
   while(i < g->n && updated == 1){
     updated = 0;
     for(v = 0; v < g->n; v++){
@@ -247,31 +288,51 @@ void update_depth(Graph g){
   }
 }
 
-void update_y(Graph g){
+/*atualiza o vetor de potenciais*/
+void update_y(Arvore g){
   Vertex root, v;
   Arc x;
   int i;
+  /*atualizado eh um vetor auxiliar. atualizado[i] = 1 se o vertice i ja teve seu
+   potencial atualizado e eh 0 caso ainda precisemos atualizar y[i].*/
   int *atualizado = malloc(sizeof(int)*g->n);
+  /*falta guara quantos vertices ainda precisamos atualizar*/
   int falta = g->n;
   for(i = 0; i < g->n; i++)
-    atualizado[i] = 0;
+    atualizado[i] = 0; /*inicialmente, precisamos atualizar todos os vertices*/
   
-  for(root = 0; root < g->n; root++)
+  for(root = 0; root < g->n; root++) /*achamos a raiz da arvore*/
     if(prnt(g,root) == root)
       break;
   
-  g->y[root] = 0;
-  atualizado[root] = 1;
-  falta--;
+  g->y[root] = 0; /*setamos arbitrariamente a raiz como tendo potencial 0*/
+  atualizado[root] = 1; /*marcamos que ja atualizamos a raiz*/
+  falta--; /*falta um vertice a menos para atualizar*/
+
   i = 0;
+  
+  /*
+    No loop abaixo, percorremos (no maximo) n vezes o vetor em busca de ver-
+    tices ainda nao atualizados, e adequamos seu potencial de acordo com o
+    potencial de seu pai. Sabemos que ao final todo vertice estara atualizado,
+    pois no pior caso, atualizamos pelo menos um vertice a cada iteracao do 
+    loop while (que tem n iteracoes).
+
+    Se verificamos que o loop while teve menos de n iteracoes, mas ja atuali-
+    zamos todos os potenciais, encerramos o loop.
+
+    para um arco (i,j) na arvore, temos que: y[i] - y[j] = custo de (i,j)
+   */
+
   while(i < g->n && falta > 0){
     for(v = 0; v < g->n; v++){
+      /*se o pai de um vertice foi atualizado e ele nao, precisamos atualiza-lo*/
       if(atualizado[prnt(g,v)] && !atualizado[v]){
 	x = g->arvore[v];
 	if(x->ini == v)
-	  g->y[v] = x->cost + g->y[g->pais[v]];
+	  g->y[v] = x->cost + g->y[g->pais[v]]; 
 	else
-	  g->y[v] = g->y[g->pais[v]] - x->cost;
+	  g->y[v] = g->y[g->pais[v]] - x->cost; 
 	atualizado[v] = 1;
 	falta--;
       }
@@ -281,16 +342,35 @@ void update_y(Graph g){
   free(atualizado);
 }
 
-void network_simplex(Graph g){
+/*Roda o simplex para redes. Recebemos um Graph g com a configuraca da rede e uma Arvore t,
+  que contem, inicialmente uma solucao viavel. Temos que ao final da funcao, a Arvore t ar-
+  mazenara a arvore associada a solucao otima do problema.
+  
+  Temos que a cada iteracao, procuramos na rede uma arco que eh candidato a entrar na base:
+  se o retorno for null, quer dizer que nao temos candidatos e a solucao atual eh otima.
+
+  Caso haja um arco candidato a entrar na base entao:
+  
+  i) chamamos update_prnt, que chama tree_path para encontrar o arco de saida e o tirar da base.
+  Entao, update_prnt prossegue para atualizar a solucao, que eh mantida na forma da Arvore t.
+
+  ii) chamamos update_y para atualizar os potenciais da rede. Isso nos permitira decidir, no
+  inicio da proxima iteracao, se a Arvore t eh associada a uma solucao otima ou nao.
+
+  iii) chamamos update_depth para atualizar a profundidade de todos na arvore.
+
+*/
+void network_simplex(Graph g, Arvore t){
   Arc x;
-  while( (x = entry_arc(g)) != NULL ){
-    update_prnt(g,x);
-    update_y(g);
-    update_depth(g);
+  while( (x = entry_arc(g,t)) != NULL ){
+    update_prnt(t,x);
+    update_y(t);
+    update_depth(t);
   }
 }
 
-float net_cost(Graph g){
+/*Devolve o custo de transporte por um rede r, com uma solucao viavel g*/
+float net_cost(Arvore g, Graph r){
   Arc x;
   Vertex v;
   float cost = 0;
@@ -298,5 +378,5 @@ float net_cost(Graph g){
     x = g->arvore[v];
     if( x != NULL && x->fluxo != 0) cost += x->cost;
   }
-  return cost*g->demanda;
+  return cost*r->demanda;
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "grafo.h"
+#include "arvore.h"
 #include "lerEntrada.h"
 #include "simplex.h"
 
@@ -14,39 +15,42 @@ damos a essas arestas um custo infinito, para nos assegurar de que elas seram su
 
 Alem disso, ja conseguimos uma arvore inicial para resolver o problema auxiliar: setamos a ori-
 gem como raiz. Ela sera o pai do vertice do qual emanam os arcos artificiais, e este sera o pai 
-dos demais vertices.*/
-int insere_arcos_artificiais(Graph g){
+dos demais vertices.
+
+Ao final, devolvemos a arvore construida. Ela eh uma solucao viavel para o problema auxiliar
+que resolvemos nessa primeira fase do simplex.*/
+Arvore insere_arcos_artificiais(Graph g){
   Arc x;
   Vertex v,u;
   double infinito = 1.0/0.0; /*vamos definir o custo das arestas artificiais como infinito
 			       dessa forma, desencorajamos seu uso e sabemos que se ao final nao
 			       conseguimos nos livrar delas, o problema eh inviavel*/
-
+  Arvore t = init_tree(g->n);
   /*achamos um vertice que nao eh nem a origem, nem o destino*/
   if(g->n == 2){
     x = add_arc(g, g->origem, g->destino, infinito, g->demanda);
-    set_parent(g,g->origem,g->destino,x);
-    return g->origem;
+    set_parent(t,g->origem,g->destino,x);
+    return t;
   }
   
   for(v = 0; v < g->n; v++){
     if(v != g->origem && v != g->destino){
       /*adicionamos arcos de custo infinito indo da origem para o vertice e dele para os demais*/
       x = add_arc(g,g->origem,v, infinito, g->demanda);
-      set_parent(g,g->origem,v, x);
+      set_parent(t,g->origem,v, x);
       for(u = 0; u < g->n; u++){
 	if(u != g->origem && v != u){
 	  if(u != g->destino) 
 	    x = add_arc(g,v,u,infinito,0);
 	  else 
 	    x = add_arc(g,v,u,infinito,g->demanda);
-	  set_parent(g,v,u,x);
+	  set_parent(t,v,u,x);
 	}
       }
       break;
     }
   }
-  return v; /*retornamos o vertice que foi utilizado*/
+  return t; /*retornamos a arvore que foi construida*/
 }
 
 /*Uma vez em posse da solucao inicial, nao precisaremos mais dos arcos artificiais e podemos
@@ -82,14 +86,28 @@ void remove_arcos_artificiais(Graph g){
   }
 }
 
-void acha_solucao_inicial(Graph g){
-  insere_arcos_artificiais(g);
-  update_y(g);
-  network_simplex(g);
+/*Insere os arcos artificiais na rede para achar uma solucao inicial viavel, entao,
+ atualizamos o potencial dos vertices da arvore e rodamos o metodo do simplex de redes.
+
+ O que se retorna eh uma arvore que eh uma solucao viavel para o problema inicial, caso
+ nao contenha arcos artificiais.
+
+ Foi verificado que, quando o problema eh viavel, a arvore devolvida corresponde a solu-
+ cao otima.
+*/
+Arvore acha_solucao_inicial(Graph g){
+  Arvore t;
+  t = insere_arcos_artificiais(g); /*peg*/
+  update_y(t);
+  network_simplex(g,t);
   remove_arcos_artificiais(g);
+  return t;
 }
 
-int checa_viabilidade(Graph g){
+/*checa se uma arvore eh uma solucao viavel para o problema original. Para isso, vemos
+ se ela contem alguma arco artificial.*/
+
+int checa_viabilidade(Arvore g){
   Arc x;
   Vertex v;
   double inf = 1.0/0.0;
@@ -101,49 +119,3 @@ int checa_viabilidade(Graph g){
   }
   return 1;
 }
-
-/*int main(int argc, char** argv){
-  char * entrada = argv[1];
-  Graph g = le_entrada(entrada);
-  int viavel;
-  acha_solucao_inicial(g);
-  viavel = checa_viabilidade(g);
-  if(viavel){
-    show_graph(g);
-    show_tree(g);
-  }
-  else
-    printf("Problema inviavel.\n");
-  return 0;
-  }*/
-
-
-/*int main(int argc, char** argv){
-  char * entrada = argv[1];
-  Graph g = le_entrada(entrada);
-  int viavel;
-  Arc x;
-  Vertex u,v;
-  insere_arcos_artificiais(g);
-  update_y(g);
-  show_graph(g);
-  show_tree(g);
-  while(scanf("%d %d",&u,&v) != EOF){
-    x = entry_arc(g);
-    if(x == NULL){
-      puts("acabou!");
-      break;
-    }
-    else{
-      printf("Arco de entrada: %d %d", x->ini, x->dest);
-      x = is_arc(g, u, v);
-      update_prnt(g,x);
-      update_y(g);
-      update_depth(g);
-      /*show_graph(g);
-      show_tree(g);
-    }
-  }
-  return 0;
-}*/
-
