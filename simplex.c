@@ -31,7 +31,7 @@ double inf = 1.0/0.0;
   extremidades do arco que entra. Enquanto achamos o caminho, vamos mantendo regsitro do arco
   reverso com menor fluxo; ele sera o retornado pela funcao e removido da arvore.*/
 Arc tree_path(Arvore g, Arc entry, Vertex** pshow, int* s){
-  Arc x, resp, xv, xu;
+  Arc x, resp = NULL, xv, xu;
   Vertex aux, u = entry->ini, v = entry->dest;
   /*para teste de codigo, foram mantidas variaveis para armazenar explicitamente o caminho*/
   Vertex *path; /*caminho de u a v*/
@@ -184,7 +184,7 @@ Arc tree_path(Arvore g, Arc entry, Vertex** pshow, int* s){
 void update_prnt(Arvore g, Arc entry){
   Arc leaving, auxiliar;
   Vertex *path, e1, e2, f1, f2, root;
-  int size = 0, i, beforeroot = 1, posroot = pow(2,30), posf2, posf1;
+  int size = 0, i, beforeroot = 1, posroot = pow(2,30), posf2 = 0, posf1 = 0;
 
   leaving = tree_path(g,entry,&path,&size); /*arco de saida*/
   
@@ -370,7 +370,7 @@ void network_simplex(Graph g, Arvore t){
 }
 
 /*Devolve o custo de transporte por um rede r, com uma solucao viavel g*/
-float net_cost(Arvore g, Graph r){
+double net_cost(Arvore g, Graph r){
   Arc x;
   Vertex v;
   float cost = 0;

@@ -12,7 +12,7 @@ int main(int argc, char** argv){
   Graph g;
   Arvore t;
   int viavel;
-  float custo;
+  double custo;
   /*verificamos se foi passado um arquivo de entrada com a configuracao da rede.*/
   if(argc < 2){
     puts("Entre um arquivo com a configuracao da rede.");
@@ -35,7 +35,7 @@ int main(int argc, char** argv){
     show_graph(g);
     puts("A arvore associada a solucao otima eh:");
     show_tree(t);
-    printf("O custo minimo do transporte eh: %lf\n", custo);
+    printf("O custo minimo do transporte eh: %f\n", custo);
   }
   return 0;
 }

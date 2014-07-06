@@ -70,13 +70,13 @@ Arc add_arc(Graph g, Vertex ini, Vertex dest, double cost, double fluxo){
 void show_graph(Graph g){
   Vertex v;
   list l;
-  printf("Origem: %d\nDestino: %d\nEscoamento: %lf\n", g->origem, g->destino, g->demanda);
+  printf("Origem: %d\nDestino: %d\nEscoamento: %f\n", g->origem, g->destino, g->demanda);
   for(v = 0; v < g->n; v++){
     printf("%d:\n", v);
     for(l = g->adj[v]; l != NULL; l = l->next){
       Arc x = l->arco;
       if(v == x->ini)
-	printf("\t %d - cost: %lf - fluxo: %lf\n", x->dest, x->cost, x->fluxo);
+	printf("\t %d - cost: %f - fluxo: %f\n", x->dest, x->cost, x->fluxo);
     }
     puts("");
   }

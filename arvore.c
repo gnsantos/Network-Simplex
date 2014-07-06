@@ -81,7 +81,7 @@ void show_tree(Arvore g){
   puts("Arcos:");
   for(v = 0; v < g->n; v++){
     if((x = g->arvore[v]) != null){
-      printf("\t%d->%d - cost: %lf - fluxo: %lf\n",x->ini, x->dest, x->cost, x->fluxo);
+      printf("\t%d->%d - cost: %f - fluxo: %f\n",x->ini, x->dest, x->cost, x->fluxo);
     }
   }
   puts("");
@@ -97,6 +97,6 @@ void show_path(Arvore g, Arc e){
   for(i = 0; i < size; i++)
     printf(" %d ",path[i]);
   puts("");
-  printf("sai %d->%d, de custo %lf e antigo fluxo %lf\n\n", x->ini, x->dest, x->cost, x->fluxo);
+  printf("sai %d->%d, de custo %f e antigo fluxo %f\n\n", x->ini, x->dest, x->cost, x->fluxo);
 }
 
